@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import axios, { AxiosError } from 'axios'
+import useUserSOLBalanceStore from 'stores/useUserSOLBalanceStore'
 
 export default function ImageDropZone() {
   const [inputImage, setInputImage] = useState<string | null>(null)
@@ -14,7 +15,7 @@ export default function ImageDropZone() {
     message: string
   } | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
-
+  const { setImageUrl} = useUserSOLBalanceStore()
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return
 
@@ -57,6 +58,7 @@ export default function ImageDropZone() {
       })
       console.log('first: ', response)
       setOutputImage(response.data.outputImage)
+      setImageUrl(response.data.outputImage)
       console.log('first2: ', response.data.outputImage)
     } catch (err) {
       console.error('Error during image conversion:', err)

@@ -3,11 +3,14 @@ import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
 
 interface UserSOLBalanceStore extends State {
   balance: number;
+  imageUrl: string;
   getUserSOLBalance: (publicKey: PublicKey, connection: Connection) => void
+  setImageUrl: (newUrl:string)=> void;
 }
 
 const useUserSOLBalanceStore = create<UserSOLBalanceStore>((set, _get) => ({
   balance: 0,
+  imageUrl: '',
   getUserSOLBalance: async (publicKey, connection) => {
     let balance = 0;
     try {
@@ -24,6 +27,10 @@ const useUserSOLBalanceStore = create<UserSOLBalanceStore>((set, _get) => ({
       console.log(`balance updated, `, balance);
     })
   },
+  setImageUrl: (newUrl) => 
+    set((prev) => ({
+      imageUrl: newUrl
+    }))
 }));
 
 export default useUserSOLBalanceStore;
