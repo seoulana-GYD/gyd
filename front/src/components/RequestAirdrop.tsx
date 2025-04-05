@@ -38,11 +38,11 @@ export const RequestGenerate: FC = () => {
   const onClick = useCallback(async () => {
     if (!publicKey) {
       console.log('error', 'Wallet not connected!')
-      notify({
-        type: 'error',
-        message: 'error',
-        description: 'Wallet not connected!',
-      })
+      // notify({
+      //   type: 'error',
+      //   message: 'error',
+      //   description: 'Wallet not connected!',
+      // })
       return
     }
 
