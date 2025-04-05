@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import axios, { AxiosError } from 'axios'
 import useUserSOLBalanceStore from 'stores/useUserSOLBalanceStore'
+import Lottie from 'lottie-react'
 
 export default function ImageDropZone() {
   const [inputImage, setInputImage] = useState<string | null>(null)
@@ -15,7 +16,7 @@ export default function ImageDropZone() {
     message: string
   } | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
-  const { setImageUrl} = useUserSOLBalanceStore()
+  const { setImageUrl } = useUserSOLBalanceStore()
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return
 
@@ -199,6 +200,13 @@ export default function ImageDropZone() {
             'Convert'
           )}
         </button>
+        {!outputImage && (
+          <Lottie
+            animationData={require('./cat.json')}
+            loop
+            autoplay={loading}
+          />
+        )}
         {outputImage && (
           <div className="mt-8 p-6 border border-gray-200 rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Conversion Results</h2>
