@@ -1,3 +1,5 @@
+'use client'
+
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, TransactionSignature } from '@solana/web3.js'
 import { FC, useCallback } from 'react'
@@ -8,6 +10,24 @@ import { Bank } from './bank'
 import idl from './bank.json'
 import * as splToken from "@solana/spl-token";
 
+import {
+  createNft,
+  mplTokenMetadata,
+} from "@metaplex-foundation/mpl-token-metadata";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import {
+ // createGenericFile,
+  createSignerFromKeypair,
+  generateSigner,
+  keypairIdentity,
+  percentAmount,
+  sol,
+} from "@metaplex-foundation/umi";
+import { mockStorage } from "@metaplex-foundation/umi-storage-mock";
+// import * as fs from "node:fs";
+import secret from "./id.json";
+import { useRouter } from 'next/navigation'
+//import { sign } from 'node:crypto'
 
 
 
@@ -17,6 +37,28 @@ const idl_object = JSON.parse(idl_string)
 // Devnet RPC URL
 const DEVNET_URL = "https://api.devnet.solana.com";
 const programID = new PublicKey("7nLFD23KKdVb82fJDJEDgQ1N6ZBy1AsW5e5R9Vizc6VF");
+
+const umi = createUmi(DEVNET_URL);
+
+
+const creatorWallet = umi.eddsa.createKeypairFromSecretKey(
+  new Uint8Array(secret)
+);
+const creator = createSignerFromKeypair(umi, creatorWallet);
+umi.use(keypairIdentity(creator));
+umi.use(mplTokenMetadata());
+umi.use(mockStorage());
+
+const nftDetail = {
+  name: "AI genrated NFT",
+  symbol: "AINFT",
+  uri: "https://img.freepik.com/free-vector/cute-comic-shiba-inu-different-poses-vector-illustrations-set-dog-cartoon-character-standing-sitting-symbol-2018-isolated-white-background-pets-domestic-animals-new-year-concept_74855-24437.jpg?t=st=1743857219~exp=1743860819~hmac=98b2c44bac430d8710abfe062e1163f7ce25cbf1ee7a0125bb1c42221299f77c&w=826",
+  royalties: 5.5,
+  description: "GYD NFT",
+  imgType: "image/png",
+  attributes: [{ trait_type: "Speed", value: "Quick" }],
+};
+
 
 
 // 지갑 설정 (예시, Phantom 지갑 사용)
@@ -29,11 +71,30 @@ const getProvider = (connection: Connection, wallet: any) => {
   return provider;
 };
 
+
+async function mintNft(metadataUri: string) {
+  try {
+    const mint = generateSigner(umi);
+    await createNft(umi, {
+      mint,
+      name: nftDetail.name,
+      symbol: nftDetail.symbol,
+      uri: metadataUri,
+      sellerFeeBasisPoints: percentAmount(nftDetail.royalties),
+      creators: [{ address: creator.publicKey, verified: true, share: 100 }],
+    }).sendAndConfirm(umi);
+    console.log(`Created NFT: ${mint.publicKey.toString()}`);
+  } catch (e) {
+    throw e;
+  }
+}
+
 export const RequestGenerate: FC = () => {
   const { connection } = useConnection();
   const { publicKey, signTransaction, signAllTransactions } = useWallet()
   const { getUserSOLBalance,  imageUrl } = useUserSOLBalanceStore()
   
+  const router = useRouter()
 
   const onClick = useCallback(async () => {
     if (!publicKey) {
@@ -77,6 +138,25 @@ export const RequestGenerate: FC = () => {
   }, [publicKey, connection, getUserSOLBalance])
 
 
+
+async function mintNft(metadataUri: string, receipt: PublicKey) {
+  try {
+    console.log("receipt",receipt)
+    const mint = generateSigner(umi);
+    await createNft(umi, {
+      mint,
+      name: nftDetail.name,
+      symbol: nftDetail.symbol,
+      uri: metadataUri,
+      sellerFeeBasisPoints: percentAmount(nftDetail.royalties),
+      creators: [{ address: creator.publicKey, verified: true, share: 100 }],
+    }).sendAndConfirm(umi);
+    console.log(`Created NFT: ${mint.publicKey.toString()}`);
+  } catch (e) {
+    throw e;
+  }
+}
+
   const createNFT = async () => {
     try {
       if (!publicKey) {
@@ -84,49 +164,54 @@ export const RequestGenerate: FC = () => {
         return;
       }
   
-      const anchProvider = getProvider(connection, { publicKey, signTransaction, signAllTransactions });
-      const program = new Program<Bank>(idl_object, anchProvider);
+      // const anchProvider = getProvider(connection, { publicKey, signTransaction, signAllTransactions });
+      // const program = new Program<Bank>(idl_object, anchProvider);
   
-      // Provider의 지갑을 signer로 설정
+      // // Provider의 지갑을 signer로 설정
       const signer = publicKey;
+      // console.log("signer",signer)
   
-      // 필요한 PDA 및 ATA 계산
-      let [vaultData, bump_a] = PublicKey.findProgramAddressSync(
-        [Buffer.from("valut_data"), signer.toBuffer()],
-        program.programId
-      );
+      // // 필요한 PDA 및 ATA 계산
+      // let [vaultData, bump_a] = PublicKey.findProgramAddressSync(
+      //   [Buffer.from("valut_data"), signer.toBuffer()],
+      //   program.programId
+      // );
   
-      let [newMint, bump_m] = PublicKey.findProgramAddressSync(
-        [Buffer.from("mint"), signer.toBuffer()],
-        program.programId
-      );
+      // let [newMint, bump_m] = PublicKey.findProgramAddressSync(
+      //   [Buffer.from("mint"), signer.toBuffer()],
+      //   program.programId
+      // );
   
-      let newVault = splToken.getAssociatedTokenAddressSync(
-        newMint,
-        vaultData,
-        true
-      );
+      // let newVault = splToken.getAssociatedTokenAddressSync(
+      //   newMint,
+      //   vaultData,
+      //   true
+      // );
   
-      console.log("New Vault:", newVault.toString());
-      console.log("Authority:", vaultData.toString());
-      console.log("New Mint:", newMint.toString());
-      console.log("Signer:", signer.toString());
+      // console.log("New Vault:", newVault.toString());
+      // console.log("Authority:", vaultData.toString());
+      // console.log("New Mint:", newMint.toString());
+      // console.log("Signer:", signer.toString());
   
-      await program.methods
-        .initialize(imageUrl) // or URL, depending on what you're passing
-        .accounts({
-          signer: signer,
-          valutData: vaultData,
-          newMint: newMint,
-          newValut: newVault,
-          systemProgram: SystemProgram.programId,
-          tokenProgram: splToken.TOKEN_PROGRAM_ID,
-          associatedTokenProgram: splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-        })
-        .signers([]) // Phantom 지갑 사용 시 signers 배열은 빈 배열로 설정
-        .rpc();
-  
+      // await program.methods
+      //   .initialize(imageUrl) // or URL, depending on what you're passing
+      //   .accounts({
+      //     signer: signer,
+      //     valutData: vaultData,
+      //     newMint: newMint,
+      //     newValut: newVault,
+      //     systemProgram: SystemProgram.programId,
+      //     tokenProgram: splToken.TOKEN_PROGRAM_ID,
+      //     associatedTokenProgram: splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
+      //   })
+      //   .signers([]) // Phantom 지갑 사용 시 signers 배열은 빈 배열로 설정
+      //   .rpc();
+      console.log("imageUri",imageUrl)
+      console.log("signer",signer)
+      const resNft = await mintNft(imageUrl,signer)
+      console.log("resNft",resNft)
       console.log("Wow, new bank was created");
+      router.push('/gachart')
     } catch (error) {
       console.error('Error while creating a bank: ' + error);
     }
