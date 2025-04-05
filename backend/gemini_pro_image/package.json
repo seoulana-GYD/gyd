@@ -1,0 +1,20 @@
+{
+    "name": "gemini-image-converter",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Convert photos to 2D cartoon images using Gemini API",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "keywords": [
+      "gemini",
+      "image",
+      "cartoon"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "@google/genai": "^0.2.0"
+    }
+  }

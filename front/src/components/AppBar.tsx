@@ -21,7 +21,7 @@ export const AppBar: React.FC = () => {
       {/* NavBar / Header */}
       <div className="navbar flex h-20 flex-row md:mb-2 shadow-lg text-neutral-content border-b border-zinc-600 bg-opacity-66">
         <div className="navbar-start align-items-center">
-          <div className="hidden sm:inline w-22 h-22 md:p-2 ml-10">
+          <div className="hidden sm:inline w-22 h-22 md:p-2 ml-10 mr-3">
             <Link
               href="https://solana.com"
               target="_blank"
@@ -38,7 +38,7 @@ export const AppBar: React.FC = () => {
         {/* Nav Links */}
         {/* Wallet & Settings */}
         <div className="navbar-end">
-          <div className="hidden md:inline-flex align-items-center justify-items gap-6">
+          <div className="hidden md:inline-flex items-center justify-center gap-6">
             <NavElement
               label="Mint"
               href="/"
