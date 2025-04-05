@@ -61,33 +61,17 @@ const nftDetail = {
 
 
 
-// 지갑 설정 (예시, Phantom 지갑 사용)
-const getProvider = (connection: Connection, wallet: any) => {
-  if (!wallet || !wallet.publicKey) {
-    throw new Error("Wallet not connected!"); // 에러 처리
-  }
+// // 지갑 설정 (예시, Phantom 지갑 사용)
+// const getProvider = (connection: Connection, wallet: any) => {
+//   if (!wallet || !wallet.publicKey) {
+//     throw new Error("Wallet not connected!"); // 에러 처리
+//   }
 
-  const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
-  return provider;
-};
+//   const provider = new AnchorProvider(connection, wallet, AnchorProvider.defaultOptions());
+//   return provider;
+// };
 
 
-async function mintNft(metadataUri: string) {
-  try {
-    const mint = generateSigner(umi);
-    await createNft(umi, {
-      mint,
-      name: nftDetail.name,
-      symbol: nftDetail.symbol,
-      uri: metadataUri,
-      sellerFeeBasisPoints: percentAmount(nftDetail.royalties),
-      creators: [{ address: creator.publicKey, verified: true, share: 100 }],
-    }).sendAndConfirm(umi);
-    console.log(`Created NFT: ${mint.publicKey.toString()}`);
-  } catch (e) {
-    throw e;
-  }
-}
 
 export const RequestGenerate: FC = () => {
   const { connection } = useConnection();
@@ -142,15 +126,26 @@ export const RequestGenerate: FC = () => {
 async function mintNft(metadataUri: string, receipt: PublicKey) {
   try {
     console.log("receipt",receipt)
+
+     // 랜덤 숫자 생성 (1000부터 9999까지)
+     const randomNum = Math.floor(Math.random() * 9000) + 1000;
+    
+     // 기존 이름에 랜덤 숫자 추가
+     const randomizedName = `${nftDetail.name} #${randomNum}`;
+     
+     console.log("metadataUri",metadataUri)
+
     const mint = generateSigner(umi);
     await createNft(umi, {
       mint,
-      name: nftDetail.name,
+      name: randomizedName,
       symbol: nftDetail.symbol,
       uri: metadataUri,
       sellerFeeBasisPoints: percentAmount(nftDetail.royalties),
       creators: [{ address: creator.publicKey, verified: true, share: 100 }],
+      tokenOwner: receipt,
     }).sendAndConfirm(umi);
+    
     console.log(`Created NFT: ${mint.publicKey.toString()}`);
   } catch (e) {
     throw e;
@@ -207,7 +202,7 @@ async function mintNft(metadataUri: string, receipt: PublicKey) {
       //   .signers([]) // Phantom 지갑 사용 시 signers 배열은 빈 배열로 설정
       //   .rpc();
       console.log("imageUri",imageUrl)
-      console.log("signer",signer)
+      console.log("signer",signer,signer.toString())
       const resNft = await mintNft(imageUrl,signer)
       console.log("resNft",resNft)
       console.log("Wow, new bank was created");
