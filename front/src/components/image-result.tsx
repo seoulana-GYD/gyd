@@ -4,7 +4,7 @@ import React from 'react'
 import useUserSOLBalanceStore from 'stores/useUserSOLBalanceStore'
 
 export default function ImageResult() {
-  const { imageUrl, setImageUrl } = useUserSOLBalanceStore()
+  const { imageUrl, setImageUrl, randomUrl } = useUserSOLBalanceStore()
 
   if (!imageUrl) {
     // return null
@@ -30,7 +30,7 @@ export default function ImageResult() {
           </p>
           {/* {imageUrl && ( */}
           <img
-            src={imageUrl || '/images/unknown.png'}
+            src={randomUrl || '/unknown.png'}
             alt="original-image"
             className="max-w-full max-h-[300px] object-contain"
           />

@@ -1,8 +1,8 @@
 import { FC } from 'react'
-import { BankComponent } from '../../components/Bank'
 import { SendTransaction } from '../../components/SendTransaction'
 import { SendVersionedTransaction } from '../../components/SendVersionedTransaction'
 import ImageResult from 'components/image-result'
+import { BankComponent } from 'components/bank-component'
 
 export const GachartView: FC = ({}) => {
   return (

@@ -27,7 +27,6 @@ export default function ImageDropZone() {
       lottieRef.current?.setSpeed(0.5)
       lottieRef.current?.play()
 
-      // 💡 Lottie가 렌더된 후 스크롤
       setTimeout(() => {
         targetRef.current?.scrollIntoView({ behavior: 'smooth' })
       }, 100)
