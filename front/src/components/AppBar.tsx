@@ -21,7 +21,7 @@ export const AppBar: React.FC = () => {
       {/* NavBar / Header */}
       <div className="navbar flex h-20 flex-row md:mb-2 shadow-lg text-neutral-content border-b border-zinc-600 bg-opacity-66">
         <div className="navbar-start align-items-center">
-          <div className="hidden sm:inline w-22 h-22 md:p-2 ml-10">
+          <div className="hidden sm:inline w-22 h-22 md:p-2 ml-10 mr-3">
             <Link
               href="https://solana.com"
               target="_blank"
