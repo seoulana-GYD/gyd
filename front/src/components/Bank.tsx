@@ -28,6 +28,7 @@ export const Bank: FC = () => {
   const getProvider = () => {
     const provider = new AnchorProvider(
       connection,
+      //@ts-ignore
       ourWallet,
       AnchorProvider.defaultOptions()
     )
