@@ -13,6 +13,7 @@ export default function ImageDropZone() {
     success: boolean
     message: string
   } | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
 
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return
@@ -22,7 +23,7 @@ export default function ImageDropZone() {
       setError('이미지 파일만 업로드할 수 있습니다.')
       return
     }
-
+    setFileName(file.name)
     setError(null)
     const reader = new FileReader()
     reader.onload = () => {
@@ -52,9 +53,11 @@ export default function ImageDropZone() {
 
       const response = await axios.post('/api/transform', {
         image: base64Data,
+        fileName: fileName.split('.')[0],
       })
-
+      console.log('first: ', response)
       setOutputImage(response.data.outputImage)
+      console.log('first2: ', response.data.outputImage)
     } catch (err) {
       console.error('Error during image conversion:', err)
 
@@ -152,13 +155,11 @@ export default function ImageDropZone() {
             </div>
           )}
         </div>
-
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
-
         <button
           onClick={transformImage}
           disabled={!inputImage || loading}
@@ -196,12 +197,11 @@ export default function ImageDropZone() {
             'Convert'
           )}
         </button>
-
         {outputImage && (
           <div className="mt-8 p-6 border border-gray-200 rounded-lg">
             <h2 className="text-xl font-semibold mb-4">Conversion Results</h2>
             <div className="flex flex-col md:flex-row gap-6 items-center">
-              <div className="flex-1">
+              {/* <div className="flex-1">
                 <p className="text-sm text-gray-500 mb-2">Original image</p>
                 {inputImage && (
                   <img
@@ -210,7 +210,7 @@ export default function ImageDropZone() {
                     className="max-w-full max-h-[300px] object-contain"
                   />
                 )}
-              </div>
+              </div> */}
               <div className="flex-1">
                 <p className="text-sm text-gray-500 mb-2">AI Art Image</p>
                 <img
