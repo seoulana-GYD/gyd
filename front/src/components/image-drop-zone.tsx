@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import axios, { AxiosError } from 'axios'
 import useUserSOLBalanceStore from 'stores/useUserSOLBalanceStore'
 import Lottie from 'lottie-react'
+import animationData from './cat.json' // 위치 맞게 조절
 
 export default function ImageDropZone() {
   const [inputImage, setInputImage] = useState<string | null>(null)
@@ -15,6 +16,25 @@ export default function ImageDropZone() {
     success: boolean
     message: string
   } | null>(null)
+  // 스크롤 타겟
+  const targetRef = useRef<HTMLDivElement>(null)
+  const handleScroll = () => {
+    targetRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+  const lottieRef = useRef<any>(null)
+  useEffect(() => {
+    if (loading) {
+      lottieRef.current?.setSpeed(0.5)
+      lottieRef.current?.play()
+
+      // 💡 Lottie가 렌더된 후 스크롤
+      setTimeout(() => {
+        targetRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    } else {
+      lottieRef.current?.stop()
+    }
+  }, [loading])
   const [fileName, setFileName] = useState<string | null>(null)
   const { setImageUrl } = useUserSOLBalanceStore()
   const onDrop = (acceptedFiles: File[]) => {
@@ -49,7 +69,7 @@ export default function ImageDropZone() {
     try {
       setLoading(true)
       setError(null)
-
+      handleScroll()
       // 이미지 데이터 추출 (base64 데이터 부분만)
       const base64Data = inputImage.split(',')[1]
 
@@ -202,9 +222,10 @@ export default function ImageDropZone() {
         </button>
         {!outputImage && (
           <Lottie
-            animationData={require('./cat.json')}
+            lottieRef={lottieRef}
+            animationData={animationData}
             loop
-            autoplay={loading}
+            autoplay={false}
           />
         )}
         {outputImage && (
@@ -233,7 +254,7 @@ export default function ImageDropZone() {
             <div className="mt-4">
               <a
                 href={outputImage}
-                download="ghibli_styled_image.png"
+                download="image.png"
                 className="inline-flex items-center text-blue-600 hover:text-blue-800"
               >
                 <svg
@@ -255,6 +276,7 @@ export default function ImageDropZone() {
             </div>
           </div>
         )}
+        <div ref={targetRef}></div>
       </main>
     </div>
   )
