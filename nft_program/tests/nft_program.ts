@@ -1,12 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { SolanaProgram } from "../target/types/solana_program";
+import { NftProgram } from "../target/types/nft_program";
 
-describe("solana-program", () => {
+describe("nft_program", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
-  const program = anchor.workspace.SolanaProgram as Program<SolanaProgram>;
+  const program = anchor.workspace.NftProgram as Program<NftProgram>;
 
   it("Is initialized!", async () => {
     // Add your test here.
