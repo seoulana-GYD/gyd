@@ -1,11 +1,16 @@
 import { useWallet, useConnection } from '@solana/wallet-adapter-react'
-import { FC, useCallback, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { notify } from '../utils/notifications'
 
 import { Program, AnchorProvider, setProvider } from '@coral-xyz/anchor'
 import idl from './bank.json'
 import { Bank } from './bank'
 import { PublicKey } from '@solana/web3.js'
+import diceAnimation from './dice.json'
+import Lottie from 'lottie-react'
+import useUserSOLBalanceStore from 'stores/useUserSOLBalanceStore'
+import { useWindowSize } from 'react-use' // 창 크기 가져오려면 필요
+import Confetti from 'react-confetti'
 
 const idl_string = JSON.stringify(idl)
 const idl_object = JSON.parse(idl_string)
@@ -14,7 +19,13 @@ const programID = new PublicKey(idl.address)
 export const BankComponent: FC = () => {
   const ourWallet = useWallet()
   const { connection } = useConnection()
-  const [banks, setBanks] = useState([])
+  const { imageUrl, setRandomUrl } = useUserSOLBalanceStore()
+  // const [banks, setBanks] = useState([])
+  const [showModal, setShowModal] = useState(false)
+  const [showconfetti, setShowconfetti] = useState(false)
+  const lottieRef = useRef<any>(null)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const { width, height } = useWindowSize()
 
   const getProvider = () => {
     const provider = new AnchorProvider(
@@ -26,6 +37,17 @@ export const BankComponent: FC = () => {
     setProvider(provider)
     return provider
   }
+  useEffect(() => {
+    if (showModal) {
+      setTimeout(() => {
+        lottieRef.current?.setSpeed(0.6)
+        lottieRef.current?.play()
+      }, 100) // 💡 Lottie 렌더링 이후 실행
+    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [showModal])
 
   // const createBank = async () => {
   //   try {
@@ -45,23 +67,22 @@ export const BankComponent: FC = () => {
   //   }
   // }
 
-  const getBanks = async () => {
+  const rollMatch = async () => {
     try {
-      const anchProvider = getProvider()
-      const program = new Program<Bank>(idl_object, anchProvider)
-      Promise.all(
-        (await connection.getParsedProgramAccounts(programID)).map(
-          async (bank) => ({
-            ...(await program.account.bank.fetch(bank.pubkey)),
-            pubkey: bank.pubkey,
-          })
-        )
-      ).then((banks) => {
-        console.log(banks)
-        setBanks(banks)
-      })
+      setShowModal(true)
+      let timer = setTimeout(() => {
+        setShowModal(false)
+        setRandomUrl('/doge.png')
+        setShowconfetti(true)
+        notify({
+          type: 'success',
+          message: "You've Been Matched successful! 🎉",
+          // txid: signature,
+        })
+      }, 5000)
+      // clearTimeout(timer)
     } catch (error) {
-      console.error('Error while getting banks: ' + error)
+      console.error('Error: ' + error)
     }
   }
 
@@ -117,15 +138,40 @@ export const BankComponent: FC = () => {
           </button> */}
           <button
             className="group w-60 m-2 btn animate-pulse bg-gradient-to-br from-indigo-500 to-fuchsia-500 hover:from-white hover:to-purple-300 text-black"
-            onClick={getBanks}
+            onClick={rollMatch}
           >
             <div className="hidden group-disabled:block">
               Wallet not connected
             </div>
-            <span className="block group-disabled:hidden">Roll the Match</span>
+            {!showModal && (
+              <span className="block group-disabled:hidden">
+                Roll the Match
+              </span>
+            )}
           </button>
         </div>
       </div>
+      {showModal && (
+        <dialog className="modal modal-open bg-transparent">
+          <div className="modal-box bg-transparent shadow-none flex flex-col items-center">
+            <h3 className="font-bold text-lg mb-4">Matching...</h3>
+            <Lottie
+              lottieRef={lottieRef}
+              animationData={diceAnimation}
+              loop
+              autoplay={false}
+            />
+          </div>
+        </dialog>
+      )}
+      {showconfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          numberOfPieces={200}
+          recycle={false} // 한 번만 터지게
+        />
+      )}
     </div>
   )
 }
